@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  web:
+    build:
+      context: ../
+      dockerfile: .docker/Dockerfile
+    command: bash -c "poetry run python src/main.py"
+    container_name: dm-energy-consumption
+    volumes:
+      - .:/dm-energy-consumption
+    ports:
+      - "8100:8100"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.001'
+          memory: 50M
+        reservations:
+          cpus: '0.0001'
+          memory: 20M
