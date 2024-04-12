@@ -1,7 +1,9 @@
 version: '3.9'
 
 services:
-  web:
+  dm-energy-consumption:
+    networks:
+      - dm-energy-consumption
     build:
       context: ../
       dockerfile: .docker/Dockerfile
@@ -10,7 +12,7 @@ services:
     volumes:
       - .:/dm-energy-consumption
     ports:
-      - "8100:8100"
+      - "8300:8300"
     deploy:
       resources:
         limits:
@@ -19,3 +21,6 @@ services:
         reservations:
           cpus: '0.0001'
           memory: 20M
+
+networks:
+  dm-energy-consumption:
