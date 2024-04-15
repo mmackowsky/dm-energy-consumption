@@ -17,5 +17,10 @@ async def get_measurement_by_date(date):
     return {"energy": "foo"}
 
 
+@app.delete("/api/energy/{id}", status_code=status.HTTP_200_OK)
+async def delete_measurement(id):
+    pass
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host=settings.SERVICE_HOST, port=settings.SERVICE_PORT)
