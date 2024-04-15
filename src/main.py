@@ -8,7 +8,12 @@ app = FastAPI()
 
 
 @app.get("/api/energy", status_code=status.HTTP_200_OK)
-async def get_energy():
+async def get_measurements():
+    pass
+
+
+@app.get("/api/energy/{date}", status_code=status.HTTP_200_OK)
+async def get_measurement_by_date(date):
     return {"energy": "foo"}
 
 
