@@ -16,6 +16,7 @@ dnspython = "^2.6.1"
 celery = "^5.3.6"
 sqlalchemy = "^2.0.29"
 psycopg2 = "^2.9.9"
+pyjwt = "^2.8.0"
 
 
 [build-system]
