@@ -1,38 +1,27 @@
-from datetime import datetime
 from typing import List
 
 import uvicorn
 from fastapi import FastAPI, Query, status
-from pymongo import MongoClient
 
-import database
 from config import get_settings
 from schemas import EnergyConsumption
+from utils import get_user_id
 
 settings = get_settings()
 app = FastAPI()
-client = MongoClient()
-collection = client[settings.DB_NAME][settings.DB_COLLECTION]
 
 
 @app.get("/api/energy", status_code=status.HTTP_200_OK)
 async def get_measurements():
-    measurements = collection.find({})
-    return measurements
+    return get_user_id()
 
 
 @app.get(
-    "/measurements/",
-    response_model=List[EnergyConsumption],
+    "/api/energy/{date}",
     status_code=status.HTTP_200_OK,
 )
-def get_measurements(date: datetime = Query(...)):
-    """Get measurements from a specific date."""
-    start_of_day = datetime.combine(date.date(), datetime.min.time())
-    end_of_day = datetime.combine(date.date(), datetime.max.time())
-    query = {"date": {"$gte": start_of_day, "$lte": end_of_day}}
-    measurements = list(collection.find(query))
-    return measurements
+def get_measurements(date):
+    pass
 
 
 @app.delete("/api/energy/{id}", status_code=status.HTTP_200_OK)
