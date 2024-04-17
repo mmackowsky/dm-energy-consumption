@@ -1,13 +1,12 @@
 from datetime import datetime
-from typing import List
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Query, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 
 from config import get_settings
 from database import SessionLocal, engine
 from models import EnergyConsumption
-from utils import get_user_id, set_new_id
+from utils import set_new_id
 
 settings = get_settings()
 app = FastAPI()
