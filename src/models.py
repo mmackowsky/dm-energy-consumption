@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 
 from database import Base
 
@@ -8,5 +8,5 @@ class EnergyConsumption(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     user = Column(Integer, ForeignKey("user.id"), nullable=False)
-    measurement_date = Column(String, nullable=False)
+    measurement_date = Column(DateTime, nullable=False)
     energy_consumption = Column(Integer, nullable=False)
