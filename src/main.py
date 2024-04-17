@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List
 
 import uvicorn
-from fastapi import FastAPI, Query, Request, status
+from fastapi import FastAPI, HTTPException, Query, Request, status
 
 from config import get_settings
 from database import SessionLocal, engine
@@ -35,16 +35,31 @@ async def get_measurements(request: Request):
 
 
 @app.get(
-    "/api/energy/{date}",
+    "/api/energy/{measurement_id}",
     status_code=status.HTTP_200_OK,
 )
-def get_measurement(request: Request, date):
-    pass
+def get_measurement(request: Request, measurement_id: int):
+    return (
+        db.query(EnergyConsumption)
+        .filter(EnergyConsumption.id == measurement_id)
+        .first()
+    )
 
 
-@app.delete("/api/energy/{id}", status_code=status.HTTP_200_OK)
-async def delete_measurement(id):
-    pass
+@app.delete("/api/energy/{measurement_id}", status_code=status.HTTP_200_OK)
+async def delete_measurement(measurement_id: int):
+    measurement = (
+        db.query(EnergyConsumption)
+        .filter(EnergyConsumption.id == measurement_id)
+        .first()
+    )
+    if not measurement:
+        raise HTTPException(
+            detail="Measurement not found", status_code=status.HTTP_404_NOT_FOUND
+        )
+    db.delete(measurement)
+    db.commit()
+    return {"message": "Measurement deleted"}
 
 
 if __name__ == "__main__":
