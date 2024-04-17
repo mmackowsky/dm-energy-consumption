@@ -1,4 +1,3 @@
-import os
 import random
 import time
 from datetime import datetime, timedelta
@@ -6,7 +5,7 @@ from datetime import datetime, timedelta
 from celery import Celery
 
 from config import get_settings
-from database import SessionLocal, engine
+from database import SessionLocal
 from src.models import EnergyConsumption
 
 settings = get_settings()
@@ -27,11 +26,10 @@ def create_task(task_type):
 def add_energy_consumption(user_id):
     session = SessionLocal()
     try:
-        # Losowa energia z zakresu 100 do 1000 kWh
         energy_consumption = random.randint(100, 1000)
         measurement_date = datetime.now().strftime("%Y-%m-%d")
         energy = EnergyConsumption(
-            user=user_id,  # ID użytkownika, do zastąpienia przez rzeczywistego użytkownika
+            user=user_id,
             measurement_date=measurement_date,
             energy_consumption=energy_consumption,
         )
