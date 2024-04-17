@@ -7,18 +7,21 @@ from fastapi import FastAPI, Query, Request, status
 from config import get_settings
 from database import SessionLocal, engine
 from models import EnergyConsumption
-from utils import get_user_id
+from utils import get_user_id, set_new_id
 
 settings = get_settings()
 app = FastAPI()
 db = SessionLocal()
 
 
-@app.get("/api/fake-measurement", status_code=status.HTTP_200_OK)
+@app.post("/api/fake-measurement", status_code=status.HTTP_201_CREATED)
 async def fake_measurement(request: Request):
     user_id = int(request.headers.get("request-user-id"))
     energy_consumption = EnergyConsumption(
-        id=1, user=user_id, energy_consumption=100, measurement_date=datetime.now()
+        id=set_new_id(db),
+        user=user_id,
+        energy_consumption=100,
+        measurement_date=datetime.now().strftime("%d-%m-%Y"),
     )
     db.add(energy_consumption)
     db.commit()
@@ -28,9 +31,7 @@ async def fake_measurement(request: Request):
 
 @app.get("/api/energy", status_code=status.HTTP_200_OK)
 async def get_measurements(request: Request):
-    user_id = request.headers.get("request-user-id")
-    print(user_id)
-    return {"user": user_id}
+    return db.query(EnergyConsumption).all()
 
 
 @app.get(
