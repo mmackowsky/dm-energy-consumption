@@ -1,5 +1,4 @@
-from fastapi import Header, HTTPException, Request, status
-from jwt import PyJWTError, decode
+from fastapi import Request
 from sqlalchemy import desc
 
 from config import get_settings
