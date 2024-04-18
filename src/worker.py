@@ -6,7 +6,7 @@ from celery import Celery
 
 from config import get_settings
 from database import SessionLocal
-from src.models import EnergyConsumption
+from models import EnergyConsumption
 
 settings = get_settings()
 db = SessionLocal()
