@@ -31,7 +31,7 @@ async def fake_measurement(request: Request):
 
 
 @app.get("/api/energy", status_code=status.HTTP_200_OK)
-async def get_measurements(request: Request):
+async def get_energy_consumption(request: Request):
     return db.query(EnergyConsumption).all()
 
 
@@ -39,7 +39,7 @@ async def get_measurements(request: Request):
     "/api/energy/{measurement_id}",
     status_code=status.HTTP_200_OK,
 )
-def get_measurement(request: Request, measurement_id: int):
+def get_energy_consumption_by_id(request: Request, measurement_id: int):
     return (
         db.query(EnergyConsumption)
         .filter(EnergyConsumption.id == measurement_id)
