@@ -46,3 +46,13 @@ def setup_periodic_tasks(sender, **kwargs):
         add_energy_consumption.s(),
         name="add_energy_consumption_every_24_hours",
     )
+
+
+@celery.task(name="tasks.periodic_task", bind=True, ignore_result=True)
+def periodic_task():
+    """
+    Test task set to 5 minutes
+    :return:
+    """
+    add_energy_consumption.apply_async(countdown=300, retry=False)
+    return "Periodic task scheduled"
