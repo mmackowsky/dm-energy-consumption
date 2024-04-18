@@ -8,11 +8,6 @@ from models import EnergyConsumption
 settings = get_settings()
 
 
-async def get_user_id(request: Request):
-    user_id = request.headers.get("request-user-id")
-    return user_id
-
-
 def set_new_id(db: SessionLocal):
     last_object_id = (
         db.query(EnergyConsumption).order_by(desc(EnergyConsumption.id)).first()
