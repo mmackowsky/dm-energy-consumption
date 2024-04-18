@@ -7,12 +7,14 @@ from config import get_settings
 from database import SessionLocal, engine
 from models import EnergyConsumption
 from utils import set_new_id
+from worker import periodic_task
 
 settings = get_settings()
 app = FastAPI()
 db = SessionLocal()
 
 
+# REMOVE IN FINAL VERSION
 @app.post("/api/fake-measurement", status_code=status.HTTP_201_CREATED)
 async def fake_measurement(request: Request):
     user_id = int(request.headers.get("request-user-id"))
@@ -63,4 +65,5 @@ async def delete_measurement(measurement_id: int):
 
 if __name__ == "__main__":
     EnergyConsumption.metadata.create_all(bind=engine)
+    # periodic_task.apply_async()
     uvicorn.run(app, host=settings.SERVICE_HOST, port=settings.SERVICE_PORT)
