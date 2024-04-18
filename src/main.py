@@ -31,7 +31,7 @@ async def fake_measurement(request: Request):
 
 
 @app.get("/api/energy", status_code=status.HTTP_200_OK)
-async def get_energy_consumption(request: Request):
+async def get_energy_consumptions(request: Request):
     return db.query(EnergyConsumption).all()
 
 
