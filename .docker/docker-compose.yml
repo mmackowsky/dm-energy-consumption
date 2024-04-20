@@ -11,12 +11,15 @@ services:
     container_name: dm-energy-consumption
     ports:
       - "8300:8300"
+    depends_on:
+      db-dm-energy-consumption:
+        condition: service_healthy
 
   db-dm-energy-consumption:
-    container_name: db-energy-consumption
+    container_name: db-dm-energy-consumption
     image: postgres:15
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - ./data/db-dm-energy-consumption:/var/lib/postgresql/data
     env_file:
       - .env
     environment:
