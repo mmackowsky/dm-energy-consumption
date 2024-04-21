@@ -2,7 +2,7 @@ import random
 import time
 from datetime import datetime, timedelta
 
-from celery import Celery
+from worker import Celery
 
 from config import get_settings
 from database import SessionLocal
@@ -11,7 +11,7 @@ from models import EnergyConsumption
 settings = get_settings()
 db = SessionLocal()
 
-celery = Celery(__name__)
+celery = Celery("src")
 celery.conf.broker_url = settings.CELERY_BROKER_URL
 celery.conf.result_backend = settings.CELERY_RESULT_BACKEND
 
@@ -49,7 +49,7 @@ def setup_periodic_tasks(sender, **kwargs):
 
 
 @celery.task(name="tasks.periodic_task", bind=True, ignore_result=True)
-def periodic_task():
+def periodic_task(self):
     """
     Test task set to 5 minutes
     :return:
