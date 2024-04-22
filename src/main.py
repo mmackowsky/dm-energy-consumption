@@ -7,7 +7,7 @@ from config import get_settings
 from database import SessionLocal, engine
 from models import EnergyConsumption
 from utils import set_new_id
-from worker import periodic_task, add_energy_consumption
+from worker import add_energy_consumption, periodic_task
 
 settings = get_settings()
 app = FastAPI()
@@ -57,7 +57,7 @@ def get_energy_consumption_by_id(request: Request, measurement_id: int):
 
 
 @app.delete("/api/energy/{measurement_id}", status_code=status.HTTP_200_OK)
-async def delete_measurement(measurement_id: int):
+async def delete_energy_measurement(measurement_id: int):
     measurement = (
         db.query(EnergyConsumption)
         .filter(EnergyConsumption.id == measurement_id)
