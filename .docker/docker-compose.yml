@@ -2,8 +2,6 @@ version: '3.9'
 
 services:
   app-dm-energy-consumption:
-    networks:
-      - dm-energy-consumption
     build:
       context: ../
       dockerfile: .docker/Dockerfile
@@ -33,6 +31,3 @@ services:
       interval: 5s
       timeout: 30s
       retries: 6
-
-networks:
-  dm-energy-consumption:
