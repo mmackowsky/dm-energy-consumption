@@ -7,7 +7,7 @@ from config import get_settings
 from database import SessionLocal, engine
 from models import EnergyConsumption
 from utils import set_new_id
-from worker import add_energy_consumption, periodic_task
+from worker import periodic_task
 
 settings = get_settings()
 app = FastAPI()
@@ -33,10 +33,9 @@ async def fake_measurement(request: Request):
 @app.post("/api/energy/collect-data", status_code=status.HTTP_201_CREATED)
 async def collect_data(request: Request):
     user_id = request.headers.get("request-user-id")
-    print(user_id)
-    data = add_energy_consumption.delay(user_id=user_id)
-    print(data)
-    return data
+    while True:
+        data = periodic_task(user_id)
+        return data
 
 
 @app.get("/api/energy", status_code=status.HTTP_200_OK)
