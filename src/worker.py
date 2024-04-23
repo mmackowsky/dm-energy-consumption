@@ -30,18 +30,17 @@ def create_task(task_type):
 @shared_task(name="add_energy_consumption")
 def add_energy_consumption(user_id):
     session = SessionLocal()
-    try:
-        energy_consumption = random.randint(100, 1000)
-        measurement_date = datetime.now().strftime("%Y-%m-%d")
-        energy = EnergyConsumption(
-            user=user_id,
-            measurement_date=measurement_date,
-            energy_consumption=energy_consumption,
-        )
-        session.add(energy)
-        session.commit()
-    finally:
-        session.close()
+    energy_consumption = random.randint(100, 1000)
+    measurement_date = datetime.now().strftime("%Y-%m-%d")
+    energy = EnergyConsumption(
+        user=user_id,
+        measurement_date=measurement_date,
+        energy_consumption=energy_consumption,
+    )
+    session.add(energy)
+    session.commit()
+    session.refresh(energy)
+    return energy
 
 
 @app.on_after_finalize.connect
@@ -53,11 +52,11 @@ def setup_periodic_tasks(sender, **kwargs):
     )
 
 
-@app.task(name="tasks.periodic_task", bind=True, ignore_result=True)
-def periodic_task(self):
+@app.task(name="periodic_task", bind=True, ignore_result=True)
+def periodic_task(self, user_id):
     """
-    Test task set to 5 minutes
+    Test task set to 10 sec.
     :return:
     """
-    add_energy_consumption.apply_async(countdown=300, retry=False)
-    return "Periodic task scheduled"
+    task = add_energy_consumption.apply_async(countdown=10, retry=False, args=[user_id])
+    return f"Periodic task scheduled {task}"
