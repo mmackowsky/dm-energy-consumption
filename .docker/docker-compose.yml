@@ -10,7 +10,7 @@ services:
     env_file:
       - /.env
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-dm-energy-consumption/${POSTGRES_DB}
+      - DATABASE_URL=${SQLALCHEMY_DATABASE_URL}
     ports:
       - "8300:8300"
     depends_on:
@@ -18,7 +18,7 @@ services:
         condition: service_healthy
 
   db-dm-energy-consumption:
-    container_name: postgresql_db
+    container_name: db-energy-consumption
     image: postgres:15
     volumes:
       - ./data/db-dm-energy-consumption:/var/lib/postgresql/data
@@ -29,7 +29,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}" ]
       interval: 5s
