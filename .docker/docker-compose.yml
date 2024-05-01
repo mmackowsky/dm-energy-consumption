@@ -1,0 +1,67 @@
+services:
+  app-dm-energy-consumption:
+    build:
+      context: ../
+      dockerfile: .docker/Dockerfile
+    command: bash -c "poetry run python src/main.py"
+    container_name: dm-energy-consumption
+    volumes:
+      - .:/dm-energy-consumption
+    env_file:
+      - /.env
+    environment:
+      - DATABASE_URL=${SQLALCHEMY_DATABASE_URL}
+    ports:
+      - "8300:8300"
+    depends_on:
+      db-dm-energy-consumption:
+        condition: service_healthy
+
+  app-celery:
+    build:
+      context: ../
+      dockerfile: .docker/Dockerfile
+    command: bash -c "cd src && poetry run celery -A worker worker --loglevel=INFO --without-gossip --without-mingle --without-heartbeat -Ofair --pool=solo"
+    container_name: dm-energy-consumption_celery_worker
+    volumes:
+      - .:/dm-energy-consumption
+    environment:
+      CELERY_BROKER_URL: "redis://dm-energy-consumption_redis:6379/0"
+      CELERY_RESULT_BACKEND: "redis://dm-energy-consumption_redis:6379/0"
+    depends_on:
+      - redis
+    healthcheck:
+      test: celery inspect ping
+      interval: 1m
+      timeout: 10s
+      retries: 10
+
+  redis:
+    image: "redis:latest"
+    container_name: dm-energy-consumption_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 1m
+      timeout: 10s
+      retries: 10
+
+  db-dm-energy-consumption:
+    container_name: db-energy-consumption
+    image: postgres:15
+    volumes:
+      - ./data/db-dm-energy-consumption:/var/lib/postgresql/data
+    env_file:
+      - /.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 30s
+      retries: 6
