@@ -1968,3 +1968,4 @@ files = [
 lock-version = "2.0"
 python-versions = "^3.11"
 content-hash = "1504a41e805b47f3ab5054e13ce00bfd69a11b37d66d25099e3db475b5fc203e"
+content-hash = "376722f75941da066b1633e2048ef4657d01c977b266bd4c43efa93c0c6a9867"
