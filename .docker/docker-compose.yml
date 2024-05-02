@@ -17,7 +17,6 @@ services:
       db-dm-energy-consumption:
         condition: service_healthy
 
-<<<<<<< HEAD
   app-celery:
     build:
       context: ../
@@ -48,8 +47,6 @@ services:
       timeout: 10s
       retries: 10
 
-=======
->>>>>>> 886015b48dda013a5ba4063c5624454244b21e67
   db-dm-energy-consumption:
     container_name: db-energy-consumption
     image: postgres:15
