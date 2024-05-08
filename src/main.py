@@ -1,33 +1,14 @@
-from datetime import datetime
-
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, status
 
 from config import get_settings
 from database import SessionLocal, engine
 from models import EnergyConsumption
-from utils import set_new_id
 from worker import periodic_task
 
 settings = get_settings()
 app = FastAPI()
 db = SessionLocal()
-
-
-# REMOVE IN FINAL VERSION
-@app.post("/api/fake-measurement", status_code=status.HTTP_201_CREATED)
-async def fake_measurement(request: Request):
-    user_id = int(request.headers.get("request-user-id"))
-    energy_consumption = EnergyConsumption(
-        id=set_new_id(db),
-        user=user_id,
-        energy_consumption=100,
-        measurement_date=datetime.now().strftime("%d-%m-%Y"),
-    )
-    db.add(energy_consumption)
-    db.commit()
-    db.refresh(energy_consumption)
-    return energy_consumption
 
 
 @app.post("/api/energy/collect-data", status_code=status.HTTP_201_CREATED)
