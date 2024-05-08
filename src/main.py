@@ -33,9 +33,8 @@ async def fake_measurement(request: Request):
 @app.post("/api/energy/collect-data", status_code=status.HTTP_201_CREATED)
 async def collect_data(request: Request):
     user_id = request.headers.get("request-user-id")
-    while True:
-        data = periodic_task(user_id)
-        return data
+    data = periodic_task(user_id)
+    return data
 
 
 @app.get("/api/energy", status_code=status.HTTP_200_OK)
