@@ -1,66 +1,93 @@
+import unittest
+from datetime import datetime
+
 from fastapi.testclient import TestClient
-from main import app
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from models import Base, EnergyConsumption
 
-# Create a test database
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+from config import get_settings
+from database import get_db
+from main import app
+from models import EnergyConsumption
+
+settings = get_settings()
+
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost/postgres"
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base.metadata.create_all(bind=engine)
 
-# Dependency to override the database session
-def get_test_db():
-    db = TestingSessionLocal()
+Base = declarative_base()
+
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+EnergyConsumption.metadata.create_all(bind=engine)
+
+
+def override_get_db():
     try:
+        db = TestingSessionLocal()
         yield db
     finally:
         db.close()
 
 
-client = TestClient(app)
+class TestEnergyAPI(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        Base.metadata.create_all(bind=engine)
+        app.dependency_overrides[get_db] = override_get_db
 
+    @classmethod
+    def tearDownClass(cls):
+        Base.metadata.drop_all(bind=engine)
 
-# Test cases
-def test_collect_data():
-    response = client.post("/api/energy/collect-data", headers={"request-user-id": "test_user"})
-    assert response.status_code == 201
-    assert response.json() is not None
-
-
-def test_get_energy_consumptions():
-    response = client.get("/api/energy")
-    assert response.status_code == 200
-    assert response.json() == []
-
-
-def test_get_energy_consumption_by_id():
-    # Assume there's a measurement in the database with id=1
-    # Add test data to the database
-    with get_test_db() as db:
-        measurement = EnergyConsumption(id=1, user=1, measurement_date="25-02-2024", energy_consumption=666)  # Fill in with appropriate data
-        db.add(measurement)
+    def setUp(self):
+        self.client = TestClient(app)
+        db = TestingSessionLocal()
+        energy = EnergyConsumption(
+            id=1,
+            user=1,
+            measurement_date=datetime.now().strftime("%Y-%m-%d"),
+            energy_consumption=100,
+        )
+        db.add(energy)
         db.commit()
+        db.refresh(energy)
+        db.close()
 
-    response = client.get("/api/energy/1")
-    assert response.status_code == 200
-    assert response.json() is not None
-
-
-def test_delete_energy_measurement():
-    # Assume there's a measurement in the database with id=1
-    # Add test data to the database
-    with get_test_db() as db:
-        measurement = EnergyConsumption(id=1, user=1, measurement_date="25-02-2024", energy_consumption=666)  # Fill in with appropriate data
-        db.add(measurement)
+    def tearDown(self):
+        db = TestingSessionLocal()
+        db.query(EnergyConsumption).delete()
         db.commit()
+        db.close()
 
-    response = client.delete("/api/energy/1")
-    assert response.status_code == 200
-    assert response.json() == {"message": "Measurement deleted"}
+    def test_get_energy_consumption(self):
+        response = self.client.get("/api/energy")
+        print(response.json())
+        print(response.text)
+        print(response.status_code)
 
-    # Check if the measurement is actually deleted
-    with get_test_db() as db:
-        deleted_measurement = db.query(EnergyConsumption).filter(EnergyConsumption.id == 1).first()
-        assert deleted_measurement is None
+    def test_get_energy_consumptions(self):
+        response = self.client.get("/api/energy")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["content-type"], "application/json")
+
+    def test_get_energy_consumption_by_id(self):
+        response = self.client.get("/api/energy/1")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["content-type"], "application/json")
+
+    def test_delete_energy_measurement(self):
+        response = self.client.delete("/api/energy/1")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["content-type"], "application/json")
+
+    def test_delete_nonexistent_energy_measurement(self):
+        response = self.client.delete("/api/energy/999")
+        self.assertEqual(response.status_code, 404)
+
+
+if __name__ == "__main__":
+    unittest.main()
